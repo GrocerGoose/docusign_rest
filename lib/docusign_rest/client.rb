@@ -486,7 +486,6 @@ module DocusignRest
     #
     # Returns a hash of documents that are to be uploaded
     def get_documents(files)
-      puts files.inspect.to_s
       files.each_with_index.map do |file, index|
         {
           documentId: file.fetch(:document_id, (index+1)).to_s,
