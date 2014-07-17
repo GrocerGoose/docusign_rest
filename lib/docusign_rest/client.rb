@@ -458,7 +458,7 @@ module DocusignRest
                  file[:io] || file[:path],
                  file[:content_type] || 'application/pdf',
                  file[:name],
-                 'Content-Disposition' => "file; documentid=#{index + 1}"
+                 'Content-Disposition' => "file; documentid=#{file.fetch(:document_id, index + 1)}"
                )
       end
       ios
@@ -485,11 +485,12 @@ module DocusignRest
     # documentId
     #
     # Returns a hash of documents that are to be uploaded
-    def get_documents(ios)
-      ios.each_with_index.map do |io, index|
+    def get_documents(files)
+      puts files.inspect.to_s
+      files.each_with_index.map do |file, index|
         {
-          documentId: "#{index + 1}",
-          name: io.original_filename
+          documentId: file.fetch(:document_id, (index+1)).to_s,
+          name: file[:name] || File.basename(file[:path])
         }
       end
     end
@@ -596,7 +597,7 @@ module DocusignRest
       post_body = {
         emailBlurb:   "#{options[:email][:body] if options[:email]}",
         emailSubject: "#{options[:email][:subject] if options[:email]}",
-        documents: get_documents(ios),
+        documents: get_documents(options[:files]),
         recipients: {
           signers: get_signers(options[:signers])
         },
@@ -651,7 +652,7 @@ module DocusignRest
       post_body = {
         emailBlurb: "#{options[:email][:body] if options[:email]}",
         emailSubject: "#{options[:email][:subject] if options[:email]}",
-        documents: get_documents(ios),
+        documents: get_documents(options[:files]),
         recipients: {
           signers: get_signers(options[:signers], template: true)
         },
